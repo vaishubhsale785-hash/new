@@ -3,13 +3,13 @@ PORT=3000
 NODE_ENV=development
 
 # ── Telegram Bot ─────────────────────────
-BOT_TOKEN=8579796077:AAF_8CvrHP-MukXbi9YuV9Gkjo5dFetD6Qs
-BOT_USERNAME=lundcheckbot
+BOT_TOKEN=8539776909:AAFA_jlWMUICH160r9pzzS_MIveR65pRV7Q
+BOT_USERNAME=CashbackUpiLootBot
 
 # ── Public URLs (update to your domain) ──
-BASE_URL=https://cashadda.xyz/omni-cash
-VERIFICATION_URL=https://cashadda.xyz/omni-cash/verify
-HOME_URL=https://cashadda.xyz/omni-cash/home
+BASE_URL=https://new-19f5.onrender.com/
+VERIFICATION_URL=https://new-19f5.onrender.com/verify
+HOME_URL=https://new-19f5.onrender.com/home
 
 # ── App Rules ────────────────────────────
 SIGNUP_BONUS=5
