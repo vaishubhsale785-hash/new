@@ -3,7 +3,7 @@ PORT=3000
 NODE_ENV=production
 
 # ── Telegram Bot ─────────────────────────
-BOT_TOKEN=8539776909:AAFA_jlWMUICH160r9pzzS_MIveR65pRV7Q
+BOT_TOKEN=8539776909:AAFeCudoQh3RQCXn_rXUBlooW3JmSV7vUqo
 BOT_USERNAME=CashbackUpiLootBot
 
 # ── Public URLs (update to your domain) ──
