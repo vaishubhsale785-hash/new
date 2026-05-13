@@ -1,0 +1,18 @@
+# ── Server ──────────────────────────────
+PORT=3000
+NODE_ENV=development
+
+# ── Telegram Bot ─────────────────────────
+BOT_TOKEN=8579796077:AAF_8CvrHP-MukXbi9YuV9Gkjo5dFetD6Qs
+BOT_USERNAME=lundcheckbot
+
+# ── Public URLs (update to your domain) ──
+BASE_URL=https://cashadda.xyz/omni-cash
+VERIFICATION_URL=https://cashadda.xyz/omni-cash/verify
+HOME_URL=https://cashadda.xyz/omni-cash/home
+
+# ── App Rules ────────────────────────────
+SIGNUP_BONUS=5
+REFERRAL_BONUS=5
+MIN_WITHDRAWAL=10
+DAILY_WITHDRAWAL_LIMIT=1
