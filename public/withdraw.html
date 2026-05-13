@@ -1,0 +1,352 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Flash Withdraw | White & Blue</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <script src="https://cdn.lordicon.com/lordicon.js"></script>
+
+    <style>
+        body { 
+            background: linear-gradient(145deg, #f0f9ff 0%, #e0f0fe 100%);
+            font-family: 'Outfit', sans-serif;
+            color: #0c4a6e; 
+            -webkit-tap-highlight-color: transparent;
+            overflow-x: hidden;
+        }
+
+        /* Ambient Glows - Blue & White */
+        .ambient-orb-1 {
+            position: fixed; top: -15%; left: -20%; width: 450px; height: 450px;
+            background: radial-gradient(circle, rgba(59,130,246,0.25) 0%, rgba(255,255,255,0) 70%);
+            z-index: 0; pointer-events: none;
+            animation: floatOrb 9s ease-in-out infinite alternate;
+        }
+        .ambient-orb-2 {
+            position: fixed; bottom: 10%; right: -20%; width: 500px; height: 500px;
+            background: radial-gradient(circle, rgba(2,136,209,0.2) 0%, rgba(255,255,255,0) 70%);
+            z-index: 0; pointer-events: none;
+            animation: floatOrb 11s ease-in-out infinite alternate-reverse;
+        }
+
+        @keyframes floatOrb {
+            0% { transform: translateY(0) scale(1); opacity: 0.6; }
+            100% { transform: translateY(-35px) scale(1.08); opacity: 0.9; }
+        }
+
+        /* Premium Glassmorphism - White/Blue */
+        .glass-card {
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(18px);
+            -webkit-backdrop-filter: blur(18px);
+            border: 1px solid rgba(59,130,246,0.3);
+            box-shadow: 0 20px 35px -12px rgba(0, 0, 0, 0.08);
+        }
+        
+        .neon-border {
+            position: relative;
+        }
+        .neon-border::before {
+            content: "";
+            position: absolute; inset: 0;
+            border-radius: inherit;
+            padding: 1.5px;
+            background: linear-gradient(135deg, #3b82f6, #0284c7);
+            -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+            -webkit-mask-composite: xor;
+            mask-composite: exclude;
+            pointer-events: none;
+        }
+
+        .text-gradient {
+            background: linear-gradient(135deg, #1e40af, #3b82f6);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        /* Input Fields - Blue Theme */
+        .cyber-input {
+            background: rgba(255, 255, 255, 0.9);
+            border: 1px solid rgba(59,130,246,0.3);
+            color: #0c4a6e;
+            transition: all 0.3s ease;
+        }
+        .cyber-input:focus {
+            outline: none;
+            border-color: #3b82f6;
+            box-shadow: 0 0 15px rgba(59,130,246,0.3);
+            background: white;
+        }
+        .cyber-input::placeholder {
+            color: #94a3b8;
+        }
+
+        .input-error {
+            border-color: #ef4444 !important;
+            box-shadow: 0 0 12px rgba(239,68,68,0.3) !important;
+        }
+        
+        .shake { animation: shake 0.4s cubic-bezier(.36,.07,.19,.97) both; }
+        @keyframes shake { 
+            10%, 90% { transform: translate3d(-1px, 0, 0); } 
+            20%, 80% { transform: translate3d(2px, 0, 0); } 
+            30%, 50%, 70% { transform: translate3d(-3px, 0, 0); } 
+            40%, 60% { transform: translate3d(3px, 0, 0); } 
+        }
+        
+        /* custom spinner */
+        .btn-loading {
+            pointer-events: none;
+            opacity: 0.7;
+        }
+        
+        .success-check {
+            animation: scalePop 0.4s cubic-bezier(0.34, 1.2, 0.64, 1);
+        }
+        
+        @keyframes scalePop {
+            0% { transform: scale(0.8); opacity: 0; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+    </style>
+</head>
+<body class="antialiased flex flex-col min-h-screen relative p-5">
+
+    <div class="ambient-orb-1"></div>
+    <div class="ambient-orb-2"></div>
+
+    <div class="relative z-10 text-center mt-3 mb-5">
+        <h1 class="text-[11px] font-black text-blue-600 tracking-[0.25em] uppercase">Secure Portal</h1>
+        <p class="text-2xl font-black text-slate-800 mt-1 flex items-center justify-center gap-2">
+            <i class="fa-solid fa-bolt text-blue-500"></i> Flash Withdraw
+        </p>
+    </div>
+
+    <!-- Balance Card -->
+    <div class="relative z-10 glass-card neon-border rounded-[2rem] p-6 mb-8 text-center overflow-hidden">
+        <div class="absolute -right-10 -bottom-10 w-32 h-32 bg-blue-200/40 rounded-full blur-2xl"></div>
+        <p class="text-blue-700 font-black uppercase tracking-widest text-[10px] mb-2 flex items-center justify-center gap-2">
+            <i class="fa-solid fa-wallet"></i> Available Balance
+        </p>
+        <h2 class="text-5xl font-black text-slate-800 drop-shadow-sm">₹<span id="display-balance">0.00</span></h2>
+        <div class="mt-2 inline-flex items-center gap-1 bg-blue-50/70 px-3 py-1 rounded-full border border-blue-200">
+            <i class="fa-solid fa-shield-alt text-blue-500 text-[9px]"></i>
+            <span class="text-[9px] text-blue-700 font-black">Secure Vault</span>
+        </div>
+    </div>
+
+    <div class="relative z-10 flex-1">
+        <div class="glass-card rounded-[2rem] p-6 border border-blue-200/50">
+            
+            <!-- Error Message -->
+            <div id="error-msg" class="hidden mb-5 p-3 bg-red-50 border border-red-300 text-red-700 text-xs font-bold rounded-xl text-center flex items-center justify-center gap-2 shadow-sm">
+                <i class="fa-solid fa-circle-exclamation"></i> <span></span>
+            </div>
+
+            <!-- Success Message -->
+            <div id="success-msg" class="hidden mb-5 p-5 bg-emerald-50 border border-emerald-300 text-emerald-800 text-sm font-black rounded-xl text-center flex flex-col items-center justify-center gap-2 shadow-md success-check">
+                <lord-icon src="https://cdn.lordicon.com/guqkthkk.json" trigger="in" colors="primary:#059669,secondary:#10b981" style="width:60px;height:60px"></lord-icon>
+                <span class="text-emerald-700">✓ Flash Transfer Successful!</span>
+                <p class="text-[11px] text-emerald-600 font-medium mt-1">Funds will be credited instantly</p>
+            </div>
+
+            <form id="withdraw-form" onsubmit="processWithdraw(event)">
+                
+                <div class="mb-5">
+                    <label class="block text-[11px] font-black text-blue-700 uppercase tracking-widest mb-2 ml-1">UPI ID / VPA Address</label>
+                    <div class="relative">
+                        <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                            <i class="fa-brands fa-google-pay text-blue-500 text-lg"></i>
+                        </div>
+                        <input type="text" id="upi_id" required placeholder="username@ybl / phonepay@ibl" class="cyber-input w-full rounded-xl py-3.5 pl-12 pr-4 font-bold placeholder:text-slate-400">
+                    </div>
+                    <p class="text-[9px] text-blue-500 mt-1 ml-2 font-medium"><i class="fa-regular fa-circle-check"></i> Accepts Google Pay, PhonePe, Paytm</p>
+                </div>
+
+                <div class="mb-6">
+                    <label class="block text-[11px] font-black text-blue-700 uppercase tracking-widest mb-2 ml-1 flex justify-between">
+                        <span>Withdraw Amount</span>
+                        <span class="text-cyan-600 text-[9px] bg-cyan-50 px-2 py-0.5 rounded-full">1x Per Day</span>
+                    </label>
+                    <div class="relative">
+                        <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                            <i class="fa-solid fa-indian-rupee-sign text-blue-500"></i>
+                        </div>
+                        <input type="number" id="amount" value="10" readonly class="cyber-input w-full rounded-xl py-3.5 pl-12 pr-4 font-black text-lg text-slate-700 bg-slate-50 cursor-not-allowed border-blue-200">
+                    </div>
+                    <div class="flex justify-between items-center mt-2 px-1">
+                        <p class="text-[10px] text-slate-500 font-medium"><i class="fa-solid fa-lock text-blue-400 mr-1"></i> Minimum Withdrawal ₹10</p>
+                        <p class="text-[10px] text-blue-600 font-black bg-blue-50 px-2 py-0.5 rounded-full">-0% Platform Fee</p>
+                    </div>
+                </div>
+
+                <button type="submit" id="submit-btn" class="w-full bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-500 hover:to-cyan-500 text-white font-black text-[15px] py-4 rounded-xl shadow-[0_10px_25px_-5px_rgba(37,99,235,0.4)] transition-all transform active:scale-95 uppercase tracking-widest flex justify-center items-center gap-2">
+                    <i class="fa-solid fa-paper-plane"></i> Instant Withdraw
+                </button>
+                
+                <div class="mt-5 text-center text-[9px] text-slate-400 font-medium flex justify-center gap-4">
+                    <span><i class="fa-regular fa-clock text-blue-400"></i> Instant UPI</span>
+                    <span><i class="fa-solid fa-shield-heart text-blue-400"></i> 256-bit SSL</span>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // Initialize Telegram WebApp
+        const tg = window.Telegram.WebApp;
+        tg.expand();
+        tg.setHeaderColor('#f0f9ff'); // light blue-white header
+        tg.setBackgroundColor('#f0f9ff');
+        
+        // Get user data from Telegram or URL params
+        const urlParams = new URLSearchParams(window.location.search);
+        const tg_id = tg.initDataUnsafe?.user?.id || urlParams.get('tg_id') || 'demo_user_123';
+        const firstName = tg.initDataUnsafe?.user?.first_name || urlParams.get('first_name') || 'User';
+        
+        // Display user greeting
+        const greetingEl = document.querySelector('.text-center .text-2xl');
+        if(greetingEl && firstName !== 'User') {
+            greetingEl.innerHTML = `<i class="fa-solid fa-bolt text-blue-500"></i> @${firstName}`;
+        }
+        
+        // Fetch current balance on load
+        function fetchBalance() {
+            fetch('/api', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+                body: `action=get_balance&tg_id=${encodeURIComponent(tg_id)}`
+            })
+            .then(res => res.json())
+            .then(data => {
+                if(data.status === 'success') {
+                    document.getElementById('display-balance').innerText = data.balance;
+                } else {
+                    document.getElementById('display-balance').innerText = '0.00';
+                }
+            })
+            .catch(() => {
+                // Demo mode: show mock balance
+                document.getElementById('display-balance').innerText = '1245.50';
+            });
+        }
+        
+        fetchBalance();
+        
+        // Error & Success Helpers
+        function showError(message, inputElement = null) {
+            const errorDiv = document.getElementById('error-msg');
+            errorDiv.querySelector('span').innerText = message;
+            errorDiv.classList.remove('hidden');
+            
+            // Hide success if visible
+            document.getElementById('success-msg').classList.add('hidden');
+            
+            if (inputElement) {
+                inputElement.classList.add('input-error', 'shake');
+                setTimeout(() => inputElement.classList.remove('shake'), 400);
+            }
+            
+            // Haptic feedback
+            if(tg.HapticFeedback) tg.HapticFeedback.notificationOccurred('error');
+        }
+        
+        function hideError() {
+            document.getElementById('error-msg').classList.add('hidden');
+        }
+        
+        // Main withdraw function
+        function processWithdraw(e) {
+            e.preventDefault();
+            
+            const upiInput = document.getElementById('upi_id');
+            const amount = 10; // fixed as per requirement
+            const btn = document.getElementById('submit-btn');
+            const errorDiv = document.getElementById('error-msg');
+            const successDiv = document.getElementById('success-msg');
+            
+            // Reset previous states
+            hideError();
+            upiInput.classList.remove('input-error');
+            successDiv.classList.add('hidden');
+            
+            // Basic UPI format validation
+            let upiValue = upiInput.value.trim();
+            if(!upiValue) {
+                showError("Please enter your UPI ID", upiInput);
+                return;
+            }
+            
+            // Simple UPI pattern check (basic)
+            const upiPattern = /^[a-zA-Z0-9.\-_]{2,50}@[a-zA-Z]{3,15}$/;
+            if(!upiPattern.test(upiValue)) {
+                showError("Invalid UPI format. Example: name@ybl", upiInput);
+                return;
+            }
+            
+            // Loading state
+            btn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> Processing Withdraw...';
+            btn.disabled = true;
+            btn.classList.add('btn-loading');
+            
+            // API call to withdraw endpoint
+            fetch('/api', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+                body: `action=withdraw&tg_id=${encodeURIComponent(tg_id)}&upi_id=${encodeURIComponent(upiValue)}&amount=${amount}`
+            })
+            .then(response => {
+                if (!response.ok) throw new Error('HTTP error');
+                return response.json();
+            })
+            .then(data => {
+                if (data.status === 'success') {
+                    // Hide form, show success
+                    document.getElementById('withdraw-form').classList.add('hidden');
+                    successDiv.classList.remove('hidden');
+                    
+                    // Update displayed balance
+                    document.getElementById('display-balance').innerText = data.new_balance;
+                    
+                    // Success haptic
+                    if(tg.HapticFeedback) tg.HapticFeedback.notificationOccurred('success');
+                    
+                    // Optional: close after 3 seconds
+                    setTimeout(() => {
+                        // if we want to auto close after success
+                        // tg.close();  (uncomment if needed)
+                    }, 2800);
+                    
+                } else {
+                    // Server error message
+                    showError(data.msg || "Withdrawal failed. Insufficient balance or daily limit reached.");
+                    btn.innerHTML = '<i class="fa-solid fa-paper-plane"></i> Instant Withdraw';
+                    btn.disabled = false;
+                    btn.classList.remove('btn-loading');
+                }
+            })
+            .catch(err => {
+                console.error("Network error:", err);
+                showError("Network error. Check your connection and try again.");
+                btn.innerHTML = '<i class="fa-solid fa-paper-plane"></i> Instant Withdraw';
+                btn.disabled = false;
+                btn.classList.remove('btn-loading');
+            });
+        }
+        
+        // Real-time UPI input cleanup
+        document.getElementById('upi_id').addEventListener('input', function() {
+            this.classList.remove('input-error');
+            hideError();
+        });
+        
+        // Optional: if Telegram WebApp sends close, handle
+        tg.ready();
+    </script>
+</body>
+</html>

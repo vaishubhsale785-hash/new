@@ -1,0 +1,591 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Elite Dashboard | White & Blue</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.lordicon.com/lordicon.js"></script>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    
+    <style>
+        body { 
+            background: linear-gradient(145deg, #f0f9ff 0%, #e6f0fa 100%);
+            font-family: 'Outfit', sans-serif;
+            color: #0a2540; 
+            -webkit-tap-highlight-color: transparent;
+            overflow-x: hidden;
+        }
+
+        .ambient-orb-1 {
+            position: fixed; top: -15%; left: -15%; width: 450px; height: 450px;
+            background: radial-gradient(circle, rgba(59,130,246,0.2) 0%, rgba(255,255,255,0) 70%);
+            z-index: 0; pointer-events: none;
+            animation: floatOrb 9s ease-in-out infinite alternate;
+        }
+        .ambient-orb-2 {
+            position: fixed; bottom: 5%; right: -20%; width: 500px; height: 500px;
+            background: radial-gradient(circle, rgba(2,136,209,0.18) 0%, rgba(255,255,255,0) 70%);
+            z-index: 0; pointer-events: none;
+            animation: floatOrb 12s ease-in-out infinite alternate-reverse;
+        }
+
+        @keyframes floatOrb {
+            0% { transform: translateY(0) scale(1); opacity: 0.6; }
+            100% { transform: translateY(-35px) scale(1.08); opacity: 0.9; }
+        }
+
+        .glass-card {
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(59,130,246,0.25);
+            box-shadow: 0 20px 35px -12px rgba(0, 0, 0, 0.08);
+            position: relative;
+            z-index: 10;
+        }
+        
+        .neon-border {
+            position: relative;
+        }
+        .neon-border::before {
+            content: "";
+            position: absolute; inset: 0;
+            border-radius: inherit;
+            padding: 1.5px;
+            background: linear-gradient(135deg, #3b82f6, #0284c7);
+            -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+            -webkit-mask-composite: xor;
+            mask-composite: exclude;
+            pointer-events: none;
+        }
+
+        .glass-nav {
+            background: rgba(255, 255, 255, 0.92);
+            backdrop-filter: blur(24px);
+            border-top: 1px solid rgba(59,130,246,0.3);
+            box-shadow: 0 -8px 25px rgba(0, 0, 0, 0.03);
+        }
+
+        .text-gradient {
+            background: linear-gradient(135deg, #1e40af, #3b82f6);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .fade-in { animation: fadeIn 0.5s cubic-bezier(0.2, 0.9, 0.4, 1.1); }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
+        .hidden { display: none !important; }
+        
+        .btn-ripple:active {
+            transform: scale(0.96);
+            transition: transform 0.08s ease;
+        }
+        
+        .copy-btn {
+            transition: all 0.3s ease;
+        }
+        
+        .toast {
+            animation: slideDown 0.3s ease-out;
+        }
+        
+        @keyframes slideDown {
+            from { transform: translateY(-100%); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+        
+        .refresh-btn {
+            transition: transform 0.3s ease;
+        }
+        .refresh-btn:hover {
+            transform: rotate(180deg);
+        }
+        .refreshing {
+            animation: spin 0.5s ease-in-out;
+        }
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+        
+        .bonus-animation {
+            animation: pulse-green 0.8s ease-out;
+        }
+        
+        @keyframes pulse-green {
+            0% { box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.4); }
+            70% { box-shadow: 0 0 0 10px rgba(34, 197, 94, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(34, 197, 94, 0); }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="ambient-orb-1"></div>
+    <div class="ambient-orb-2"></div>
+
+    <div id="loading-screen" class="fixed inset-0 bg-gradient-to-br from-white to-blue-50 z-50 flex flex-col items-center justify-center">
+        <lord-icon src="https://cdn.lordicon.com/rznjqrfe.json" trigger="loop" colors="primary:#3b82f6,secondary:#38bdf8" style="width:120px;height:120px"></lord-icon>
+        <h2 class="text-xl font-black mt-4 text-gradient tracking-widest uppercase animate-pulse">Loading Dashboard...</h2>
+        <p class="text-sm text-blue-500 mt-3" id="loading-status">Fetching your data...</p>
+    </div>
+
+    <div id="app-container" class="hidden max-w-md mx-auto min-h-screen relative pb-24 pt-4">
+        
+        <!-- Toast Notification -->
+        <div id="toast" class="fixed top-4 left-1/2 transform -translate-x-1/2 bg-emerald-500 text-white px-6 py-3 rounded-xl shadow-lg z-50 hidden transition-all duration-300" style="white-space: nowrap;">
+            <i class="fas fa-check-circle mr-2"></i>
+            <span id="toast-message">Success!</span>
+        </div>
+        
+        <!-- Header -->
+        <div class="px-6 py-2 flex justify-between items-center relative z-10 fade-in">
+            <div>
+                <p class="text-[10px] text-blue-600 font-black uppercase tracking-[0.2em] mb-1">Welcome Back,</p>
+                <h1 class="text-3xl font-black text-slate-800 leading-none truncate w-56" id="user-name">Loading...</h1>
+            </div>
+            <div class="flex gap-2 items-center">
+                <button onclick="refreshBalance()" class="refresh-btn w-10 h-10 bg-white rounded-full flex items-center justify-center shadow-md hover:shadow-lg transition-all">
+                    <i class="fa-solid fa-rotate-right text-blue-600 text-lg"></i>
+                </button>
+                <div class="w-14 h-14 bg-gradient-to-br from-blue-500 to-cyan-500 rounded-full flex items-center justify-center p-[2px] shadow-[0_5px_20px_rgba(59,130,246,0.3)]">
+                    <div class="w-full h-full bg-white rounded-full flex items-center justify-center">
+                        <i class="fa-solid fa-user-astronaut text-2xl text-gradient"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Balance Card -->
+        <div class="mx-5 mt-6 glass-card neon-border rounded-3xl p-7 relative overflow-hidden fade-in" id="balance-card">
+            <div class="absolute -right-10 -bottom-10 w-40 h-40 bg-blue-200/40 rounded-full blur-3xl"></div>
+            
+            <div class="flex justify-between items-center relative z-10">
+                <div>
+                    <p class="text-blue-700 text-xs font-black uppercase tracking-widest flex items-center gap-2 mb-2">
+                        <i class="fa-solid fa-wallet"></i> Total Wealth
+                    </p>
+                    <h2 class="text-5xl font-black text-slate-800 tracking-tighter drop-shadow-sm">₹<span id="balance">0.00</span></h2>
+                    <div class="mt-4 inline-flex items-center gap-1.5 bg-blue-50/70 border border-blue-200 px-3 py-1.5 rounded-xl">
+                        <i class="fa-solid fa-bolt text-blue-500 text-xs"></i>
+                        <span class="text-xs text-blue-800 font-bold uppercase tracking-widest">India is Best ❤</span>
+                    </div>
+                </div>
+                <lord-icon src="https://cdn.lordicon.com/lxizbtuq.json" trigger="loop" delay="500" colors="primary:#3b82f6,secondary:#38bdf8" style="width:85px;height:85px"></lord-icon>
+            </div>
+        </div>
+
+        <!-- Stats Section -->
+        <div class="px-5 mt-4 grid grid-cols-2 gap-3 fade-in">
+            <div class="glass-card rounded-2xl p-4 text-center">
+                <p class="text-xs text-blue-600 font-bold uppercase tracking-wider">Total Earned</p>
+                <p class="text-2xl font-black text-slate-800 mt-1">₹<span id="total-earned">0.00</span></p>
+            </div>
+            <div class="glass-card rounded-2xl p-4 text-center">
+                <p class="text-xs text-blue-600 font-bold uppercase tracking-wider">Total Withdrawn</p>
+                <p class="text-2xl font-black text-slate-800 mt-1">₹<span id="total-withdrawn">0.00</span></p>
+            </div>
+        </div>
+
+        <!-- History Tab -->
+        <div id="tab-history" class="tab-content block px-5 mt-8 fade-in">
+            <h3 class="font-black text-slate-800 text-xl mb-5 flex items-center gap-3 tracking-wide">
+                <i class="fa-solid fa-list-ul text-blue-500"></i> Transaction Ledger
+            </h3>
+            <div id="history-list" class="space-y-3"></div>
+        </div>
+
+        <!-- Refer Tab -->
+        <div id="tab-refer" class="tab-content hidden px-5 mt-8 text-center fade-in">
+            <div class="glass-card neon-border rounded-[2rem] p-8 relative overflow-hidden">
+                <div class="absolute top-0 left-0 w-full h-full bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-5"></div>
+                
+                <div class="flex flex-col items-center justify-center mb-6 relative z-10">
+                    <div class="w-16 h-16 bg-gradient-to-br from-blue-500 to-cyan-400 rounded-full flex items-center justify-center shadow-[0_8px_25px_rgba(59,130,246,0.4)] mb-3">
+                        <i class="fa-solid fa-crown text-2xl text-white"></i>
+                    </div>
+                </div>
+
+                <h3 class="font-black text-3xl text-slate-800 mb-2 tracking-tight text-gradient relative z-10">Build Your Empire</h3>
+                <p class="text-blue-700 text-[13px] font-medium mb-8 relative z-10">Share the wealth and get <span class="text-blue-600 font-black">₹5.00</span> guaranteed cashback for every valid friend!</p>
+                
+                <!-- Referral Link Container -->
+                <div class="bg-white/80 p-1 rounded-2xl flex items-center border border-blue-200 relative z-10 shadow-sm">
+                    <input type="text" id="ref-link" readonly class="w-full bg-transparent outline-none text-[12px] text-blue-700 font-bold px-3 tracking-wider" value="Generating Link...">
+                    <button onclick="copyReferralLink()" class="copy-btn bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-500 hover:to-cyan-500 text-white px-6 py-3.5 rounded-xl font-black text-sm uppercase shadow-md transition-all transform active:scale-95">COPY</button>
+                </div>
+                
+                <!-- Referral Stats -->
+                <div class="mt-4 text-left">
+                    <p class="text-xs text-blue-600 font-bold mb-2">📊 Your Referral Stats:</p>
+                    <div class="bg-blue-50/50 rounded-xl p-3">
+                        <div class="flex justify-between items-center">
+                            <span class="text-xs text-slate-600">Total Referrals:</span>
+                            <span class="text-lg font-black text-blue-600" id="total-referrals">0</span>
+                        </div>
+                        <div class="flex justify-between items-center mt-2">
+                            <span class="text-xs text-slate-600">Earned from Referrals:</span>
+                            <span class="text-lg font-black text-emerald-600">₹<span id="referral-earnings">0.00</span></span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="mt-6 text-left glass-card p-6 rounded-2xl">
+                <h4 class="font-black text-blue-600 mb-4 text-xs uppercase tracking-widest border-b border-blue-200 pb-2">How It Works</h4>
+                <div class="space-y-4">
+                    <div class="flex items-center gap-4">
+                        <div class="w-8 h-8 rounded-full bg-blue-100 border border-blue-300 text-blue-700 flex items-center justify-center text-sm font-black">1</div>
+                        <p class="text-sm text-slate-700 font-bold">Share your unique referral link</p>
+                    </div>
+                    <div class="flex items-center gap-4">
+                        <div class="w-8 h-8 rounded-full bg-blue-100 border border-blue-300 text-blue-700 flex items-center justify-center text-sm font-black">2</div>
+                        <p class="text-sm text-slate-700 font-bold">Friend signs up through your link</p>
+                    </div>
+                    <div class="flex items-center gap-4">
+                        <div class="w-8 h-8 rounded-full bg-cyan-100 border border-cyan-400 text-cyan-700 flex items-center justify-center text-sm font-black shadow-sm">3</div>
+                        <p class="text-sm text-slate-800 font-bold">You both instantly earn <span class="text-blue-600">₹5.00</span> each!</p>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Share Options -->
+            <div class="mt-4 grid grid-cols-2 gap-3">
+                <button onclick="shareViaTelegram()" class="glass-card p-3 rounded-xl flex items-center justify-center gap-2 hover:bg-blue-50 transition-all">
+                    <i class="fa-brands fa-telegram text-blue-500 text-xl"></i>
+                    <span class="text-xs font-bold text-slate-700">Share on Telegram</span>
+                </button>
+                <button onclick="copyReferralLink()" class="glass-card p-3 rounded-xl flex items-center justify-center gap-2 hover:bg-blue-50 transition-all">
+                    <i class="fa-solid fa-copy text-blue-500 text-xl"></i>
+                    <span class="text-xs font-bold text-slate-700">Copy Link</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- Withdraw Tab -->
+        <div id="tab-withdraw" class="tab-content hidden px-5 mt-10 text-center fade-in">
+            <lord-icon src="https://cdn.lordicon.com/qzwudxwv.json" trigger="loop" delay="500" colors="primary:#3b82f6,secondary:#0284c7" style="width:140px;height:140px"></lord-icon>
+            <h3 class="font-black text-4xl text-slate-800 mt-6 mb-2 text-gradient">Flash Withdraw</h3>
+            <p class="text-blue-600 text-sm mb-10 px-4 font-medium">Transfer funds directly to your bank account via UPI in seconds.</p>
+            
+            <button onclick="checkWithdrawEligibility()" class="inline-flex items-center justify-center w-full bg-gradient-to-r from-blue-600 to-cyan-500 text-white font-black text-xl py-5 rounded-2xl shadow-[0_12px_25px_rgba(37,99,235,0.3)] hover:shadow-[0_18px_35px_rgba(37,99,235,0.4)] transition-all transform hover:-translate-y-1 btn-ripple">
+                <i class="fa-solid fa-bolt mr-3 text-yellow-200"></i> WITHDRAW NOW
+            </button>
+            
+            <div class="mt-6 glass-card p-4 rounded-2xl">
+                <p class="text-xs text-slate-500">Minimum withdrawal: ₹100</p>
+                <p class="text-xs text-slate-500 mt-1">Processing time: 24-48 hours</p>
+            </div>
+        </div>
+
+        <!-- Bottom Navigation -->
+        <div class="fixed bottom-0 w-full max-w-md glass-nav pb-safe z-40 rounded-t-[2rem] border-t border-blue-100">
+            <div class="flex justify-around p-2.5">
+                <button onclick="switchTab('history', this)" class="nav-btn text-blue-600 flex flex-col items-center w-20 py-2 rounded-xl transition-all">
+                    <i class="fa-solid fa-chart-pie text-2xl mb-1 drop-shadow-sm"></i>
+                    <span class="text-[10px] font-black uppercase tracking-[0.1em] mt-1">History</span>
+                </button>
+                <button onclick="switchTab('refer', this)" class="nav-btn text-slate-400 hover:text-blue-500 flex flex-col items-center w-20 py-2 rounded-xl transition-all">
+                    <i class="fa-solid fa-user-group text-2xl mb-1"></i>
+                    <span class="text-[10px] font-black uppercase tracking-[0.1em] mt-1">Refer</span>
+                </button>
+                <button onclick="switchTab('withdraw', this)" class="nav-btn text-slate-400 hover:text-blue-500 flex flex-col items-center w-20 py-2 rounded-xl transition-all">
+                    <i class="fa-solid fa-money-bill-transfer text-2xl mb-1"></i>
+                    <span class="text-[10px] font-black uppercase tracking-[0.1em] mt-1">Withdraw</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Telegram WebApp initialization
+        const tg = window.Telegram?.WebApp;
+        if(tg) {
+            tg.expand();
+            tg.setHeaderColor('#f0f9ff');
+            tg.setBackgroundColor('#f0f9ff');
+            tg.enableClosingConfirmation();
+        }
+        
+        // Get user data from Telegram or session
+        let tg_id = null;
+        let device_id = null;
+        let referralCode = null;
+        let currentBalance = 0;
+        
+        // Generate or get device ID
+        function getDeviceId() {
+            let deviceId = localStorage.getItem('device_id');
+            if (!deviceId) {
+                deviceId = 'dev_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+                localStorage.setItem('device_id', deviceId);
+            }
+            return deviceId;
+        }
+        
+        // Show toast notification
+        function showToast(message, isSuccess = true) {
+            const toast = document.getElementById('toast');
+            const toastMessage = document.getElementById('toast-message');
+            toastMessage.innerText = message;
+            toast.classList.remove('hidden', 'bg-emerald-500', 'bg-red-500');
+            toast.classList.add(isSuccess ? 'bg-emerald-500' : 'bg-red-500');
+            toast.style.animation = 'slideDown 0.3s ease-out';
+            
+            setTimeout(() => {
+                toast.classList.add('hidden');
+            }, 3000);
+        }
+        
+        // Copy referral link
+        function copyReferralLink() {
+            const linkInput = document.getElementById('ref-link');
+            linkInput.select();
+            linkInput.setSelectionRange(0, 99999);
+            document.execCommand('copy');
+            
+            showToast('Referral link copied! Share with friends to earn ₹5 each', true);
+            
+            if(tg?.HapticFeedback) {
+                tg.HapticFeedback.notificationOccurred('success');
+            }
+        }
+        
+        // Share via Telegram
+        function shareViaTelegram() {
+            const link = document.getElementById('ref-link').value;
+            const text = `🎉 Join me on Omni Cash and earn ₹5 bonus! Use my referral link: ${link}`;
+            
+            if(tg) {
+                tg.sendData(JSON.stringify({ action: 'share', text: text }));
+            } else {
+                window.open(`https://t.me/share/url?url=${encodeURIComponent(link)}&text=${encodeURIComponent(text)}`, '_blank');
+            }
+        }
+        
+        // Check withdrawal eligibility
+        function checkWithdrawEligibility() {
+            const balance = parseFloat(document.getElementById('balance').innerText);
+            
+            if (balance >= 100) {
+                window.open('https://t.me/withdraw_bahubaliBot', '_blank');
+                showToast('Redirecting to withdrawal bot...', true);
+            } else {
+                showToast(`Minimum withdrawal is ₹100. You have ₹${balance.toFixed(2)}`, false);
+            }
+        }
+        
+        // Refresh balance
+        function refreshBalance() {
+            const refreshIcon = document.querySelector('.refresh-btn i');
+            refreshIcon.classList.add('refreshing');
+            
+            device_id = getDeviceId();
+            
+            fetch('/api', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+                body: `action=get_balance&tg_id=${encodeURIComponent(tg_id)}&device_id=${encodeURIComponent(device_id)}`
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    document.getElementById('balance').innerText = data.balance;
+                    document.getElementById('total-earned').innerText = data.total_earned;
+                    document.getElementById('total-withdrawn').innerText = data.total_withdrawn;
+                    showToast('Balance refreshed!', true);
+                } else {
+                    showToast(data.msg || 'Failed to refresh balance', false);
+                }
+            })
+            .catch(error => {
+                console.error('Refresh error:', error);
+                showToast('Network error. Please try again.', false);
+            })
+            .finally(() => {
+                setTimeout(() => {
+                    refreshIcon.classList.remove('refreshing');
+                }, 500);
+            });
+        }
+        
+        // Switch tabs
+        function switchTab(tabId, element) {
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
+            document.getElementById('tab-' + tabId).classList.remove('hidden');
+            
+            document.querySelectorAll('.nav-btn').forEach(btn => {
+                btn.classList.remove('text-blue-600', 'text-blue-500');
+                btn.classList.add('text-slate-400');
+                btn.querySelector('i')?.classList.remove('drop-shadow-sm');
+            });
+            
+            if(tabId === 'history') {
+                element.classList.add('text-blue-600');
+                element.querySelector('i').classList.add('drop-shadow-sm');
+            } else {
+                element.classList.add('text-blue-500');
+            }
+            
+            if(tg?.HapticFeedback) {
+                tg.HapticFeedback.selectionChanged();
+            }
+        }
+        
+        // Animate balance change
+        function animateBalanceChange(element, newValue, oldValue) {
+            if (oldValue === undefined || oldValue === element.innerText) {
+                element.innerText = newValue;
+                return;
+            }
+            
+            const oldNum = parseFloat(oldValue);
+            const newNum = parseFloat(newValue);
+            const difference = newNum - oldNum;
+            
+            if (difference > 0) {
+                document.getElementById('balance-card')?.classList.add('bonus-animation');
+                setTimeout(() => {
+                    document.getElementById('balance-card')?.classList.remove('bonus-animation');
+                }, 800);
+                showToast(`+₹${difference.toFixed(2)} added to your balance!`, true);
+            }
+            
+            element.innerText = newValue;
+        }
+        
+        // Render dashboard
+        function renderDashboard(data) {
+            const currentBalance = document.getElementById('balance').innerText;
+            animateBalanceChange(document.getElementById('balance'), data.data.balance, currentBalance);
+            
+            document.getElementById('user-name').innerText = data.data.first_name;
+            document.getElementById('total-earned').innerText = data.data.total_earned || data.data.balance;
+            document.getElementById('total-withdrawn').innerText = data.data.total_withdrawn || '0.00';
+            
+            // Generate referral link with proper format
+            const botUsername = 'lundcheckbot'; // Change to your bot username
+            const refCode = data.data.referral_code;
+            const fullLink = `https://t.me/${botUsername}?start=${refCode}`;
+            
+            document.getElementById('ref-link').value = fullLink;
+            
+            // Calculate referral earnings from history
+            let referralEarnings = 0;
+            let referralCount = 0;
+            if (data.history) {
+                data.history.forEach(tx => {
+                    if (tx.type === 'referral_bonus') {
+                        referralEarnings += parseFloat(tx.amount);
+                        referralCount++;
+                    }
+                });
+            }
+            
+            document.getElementById('total-referrals').innerText = referralCount;
+            document.getElementById('referral-earnings').innerText = referralEarnings.toFixed(2);
+            
+            // Render history
+            const historyList = document.getElementById('history-list');
+            if(!data.history || data.history.length === 0) {
+                historyList.innerHTML = `<div class="glass-card p-8 text-center rounded-2xl">
+                    <i class="fa-regular fa-receipt text-3xl text-blue-300 mb-2"></i>
+                    <p class="text-slate-500 text-sm font-bold">No Transactions Yet</p>
+                    <p class="text-xs text-slate-400 mt-1">Invite friends to start earning!</p>
+                </div>`;
+            } else {
+                historyList.innerHTML = '';
+                data.history.forEach(tx => {
+                    const isWithdraw = tx.type === 'withdraw';
+                    const isReferral = tx.type === 'referral_bonus';
+                    const isSignup = tx.type === 'signup_bonus';
+                    const sign = isWithdraw ? '-' : '+';
+                    const colorClass = isWithdraw ? 'text-slate-700' : 'text-blue-600';
+                    const icon = isWithdraw ? 'fa-arrow-up' : (isReferral ? 'fa-user-plus' : (isSignup ? 'fa-gift' : 'fa-arrow-down'));
+                    const bg = isWithdraw ? 'bg-slate-50' : 'bg-blue-50';
+                    
+                    let displayType = tx.type.replace('_', ' ');
+                    if (isSignup) displayType = 'Signup Bonus';
+                    if (isReferral) displayType = 'Referral Bonus';
+                    
+                    const div = document.createElement('div');
+                    div.className = 'glass-card p-4 rounded-2xl flex justify-between items-center border border-blue-100 hover:border-blue-300 transition-all';
+                    div.innerHTML = `
+                        <div class="flex items-center gap-4">
+                            <div class="w-12 h-12 rounded-xl ${bg} border flex items-center justify-center">
+                                <i class="fa-solid ${icon} text-blue-500 text-lg"></i>
+                            </div>
+                            <div>
+                                <p class="font-black text-slate-700 uppercase tracking-wider text-sm capitalize">${displayType}</p>
+                                <p class="text-[10px] text-blue-400 font-bold mt-0.5">${tx.created_at}</p>
+                            </div>
+                        </div>
+                        <div class="${colorClass} font-black text-xl">${sign}₹${tx.amount}</div>
+                    `;
+                    historyList.appendChild(div);
+                });
+            }
+        }
+        
+        // Load user data
+        async function loadUserData() {
+            // Get user from Telegram or session storage
+            if (tg?.initDataUnsafe?.user) {
+                tg_id = tg.initDataUnsafe.user.id;
+                tg_first_name = tg.initDataUnsafe.user.first_name;
+            } else {
+                // Try to get from session or URL
+                const urlParams = new URLSearchParams(window.location.search);
+                tg_id = urlParams.get('tg_id') || localStorage.getItem('tg_id');
+            }
+            
+            if (!tg_id) {
+                document.getElementById('loading-status').innerHTML = '❌ Please open this app from Telegram';
+                return;
+            }
+            
+            localStorage.setItem('tg_id', tg_id);
+            device_id = getDeviceId();
+            
+            document.getElementById('loading-status').innerHTML = 'Loading your dashboard...';
+            
+            try {
+                const response = await fetch('/api', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+                    body: `action=verify&tg_id=${encodeURIComponent(tg_id)}&device_id=${encodeURIComponent(device_id)}`
+                });
+                
+                const data = await response.json();
+                
+                if (data.status === 'success') {
+                    renderDashboard(data);
+                    
+                    setTimeout(() => {
+                        const loader = document.getElementById('loading-screen');
+                        loader.style.opacity = '0';
+                        setTimeout(() => {
+                            loader.classList.add('hidden');
+                            document.getElementById('app-container').classList.remove('hidden');
+                        }, 400);
+                    }, 500);
+                } else {
+                    throw new Error(data.msg || 'Failed to load data');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                document.getElementById('loading-status').innerHTML = '⚠️ Failed to load data. Please refresh.';
+            }
+        }
+        
+        // Start the app
+        document.addEventListener('DOMContentLoaded', () => {
+            loadUserData();
+        });
+    </script>
+</body>
+</html>
