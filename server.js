@@ -103,7 +103,7 @@ function registerDevice(db, tg_id, device_id, username, first_name, ip) {
 //  TELEGRAM BOT
 // ──────────────────────────────────────────────────────────────
 const bot = new TelegramBot(BOT_TOKEN, {
-  polling: process.env.NODE_ENV !== 'production'
+  polling: false
 });
 
 async function sendMsg(chat_id, text, keyboard = null) {
