@@ -1,6 +1,6 @@
 # ── Server ──────────────────────────────
 PORT=3000
-NODE_ENV=development
+NODE_ENV=production
 
 # ── Telegram Bot ─────────────────────────
 BOT_TOKEN=8539776909:AAFA_jlWMUICH160r9pzzS_MIveR65pRV7Q
