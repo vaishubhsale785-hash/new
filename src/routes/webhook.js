@@ -2,7 +2,14 @@ const express = require("express");
 const router = express.Router();
 const bot = require("../config/bot");
 
+// ✅ ADD THIS
+router.get("/", (req, res) => {
+  res.send("Webhook is working ✅");
+});
+
 router.post("/", async (req, res) => {
+  console.log("Incoming update:", req.body); // DEBUG
+
   const update = req.body;
 
   if (update.message) {
@@ -12,16 +19,9 @@ router.post("/", async (req, res) => {
     if (text === "/start") {
       const webAppUrl = `${process.env.BASE_URL}/verify`;
 
-      bot.sendMessage(chatId, "✅ Welcome! Verify your device to continue.", {
+      await bot.sendMessage(chatId, "✅ Welcome! Verify your device", {
         reply_markup: {
-          inline_keyboard: [
-            [
-              {
-                text: "🔐 Verify Device",
-                web_app: { url: webAppUrl },
-              },
-            ],
-          ],
+          inline_keyboard: [[{ text: "🔐 Verify", web_app: { url: webAppUrl } }]],
         },
       });
     }
